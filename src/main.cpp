@@ -1341,7 +1341,7 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState& state, const CTransa
         return state.DoS(10, error("AcceptToMemoryPool : Zerocoin transactions are temporarily disabled for maintenance"), REJECT_INVALID, "bad-tx");
 
     int chainHeight = chainActive.Height();
-    if (chainHeight < Params().Zerocoin_StartHeight() && !IsInitialBlockDownload() && tx.ContainsZerocoins())
+    if (chainHeight < Params().Zerocoin_Block_V2_Start() && !IsInitialBlockDownload() && tx.ContainsZerocoins())
         return state.DoS(10, error("AcceptToMemoryPool: : Zerocoin is not yet active"), REJECT_INVALID, "bad-tx");
 
     if (!CheckTransaction(tx, chainHeight >= Params().Zerocoin_StartHeight(), true, state))
@@ -2864,6 +2864,10 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
         //Temporarily disable zerocoin transactions for maintenance
         if (block.nTime > GetSporkValue(SPORK_16_ZEROCOIN_MAINTENANCE_MODE) && !IsInitialBlockDownload() && tx.ContainsZerocoins()) {
             return state.DoS(100, error("ConnectBlock() : zerocoin transactions are currently in maintenance mode"));
+        }
+
+        if (pindex->nHeight < Params().Zerocoin_Block_V2_Start() && tx.ContainsZerocoins()) {
+            return state.DoS(100, error("ConnectBlock(): zerocoin is not yet active"));
         }
 
         if (tx.IsZerocoinSpend()) {
