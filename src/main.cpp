@@ -4083,7 +4083,7 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
             REJECT_INVALID, "bad-header", true);
 
     // Check timestamp
-    LogPrint("debug", "%s: block=%s  is proof of stake=%d\n", __func__, block.GetHash().ToString().c_str(), block.IsProofOfStake());
+    LogPrint("debug", "%s: block=%s is %s\n", __func__, block.GetHash().ToString().c_str(), block.IsProofOfStake() ? "proof of stake" : "proof of work");
     if (Params().NetworkID() != CBaseChainParams::REGTEST && block.GetBlockTime() > GetAdjustedTime() + (block.IsProofOfStake() ? 180 : 7200)) // 3 minute future drift for PoS
         return state.Invalid(error("CheckBlock(): block timestamp too far in the future"),
             REJECT_INVALID, "time-too-new");
@@ -4773,7 +4773,7 @@ bool ProcessNewBlock(CValidationState &state, CNode* pfrom, CBlock* pblock, bool
     if (!CheckBlockSignature(*pblock))
         return error("ProcessNewBlock(): bad proof-of-stake block signature");
 
-    if ((!Params().HeadersFirstSyncingActive() || pfrom->nVersion < SENDHEADERS_VERSION) && pblock->GetHash() != Params().HashGenesisBlock() && pfrom != NULL) {
+    if (pblock->GetHash() != Params().HashGenesisBlock() && pfrom != NULL && (!Params().HeadersFirstSyncingActive() || pfrom->nVersion < SENDHEADERS_VERSION)) {
         //if we get this far, check if the prev block is our prev block, if not then request sync and return false
         BlockMap::iterator mi = mapBlockIndex.find(pblock->hashPrevBlock);
         if (mi == mapBlockIndex.end()) {
