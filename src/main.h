@@ -84,8 +84,6 @@ static const unsigned int MAX_BLOCKFILE_SIZE = 0x8000000; // 128 MiB
 static const unsigned int BLOCKFILE_CHUNK_SIZE = 0x1000000; // 16 MiB
 /** The pre-allocation chunk size for rev?????.dat files (since 0.8) */
 static const unsigned int UNDOFILE_CHUNK_SIZE = 0x100000; // 1 MiB
-/** Coinbase transaction outputs can only be spent after this number of new blocks (network rule) */
-static const int COINBASE_MATURITY = 10;
 /** Maximum number of script-checking threads allowed */
 static const int MAX_SCRIPTCHECK_THREADS = 16;
 /** -par default (number of script-checking threads, 0 = auto) */
@@ -106,11 +104,15 @@ static const unsigned int BLOCK_DOWNLOAD_WINDOW = 1024;
 static const unsigned int DATABASE_WRITE_INTERVAL = 3600;
 /** Maximum length of reject messages. */
 static const unsigned int MAX_REJECT_MESSAGE_LENGTH = 111;
+/** Maximum number of headers to announce when relaying blocks with headers message.*/
+static const unsigned int MAX_BLOCKS_TO_ANNOUNCE = 8;
+/** Maximum number of unconnecting headers announcements before DoS score */
+static const unsigned int MAX_UNCONNECTING_HEADERS = 10;
 
 /** Default for -headerspamfilter, use header spam filter */
 static const bool DEFAULT_HEADER_SPAM_FILTER = true;
 /** Default for -headerspamfiltermaxsize, maximum size of the list of indexes in the header spam filter */
-static const unsigned int DEFAULT_HEADER_SPAM_FILTER_MAX_SIZE = COINBASE_MATURITY;
+static const unsigned int DEFAULT_HEADER_SPAM_FILTER_MAX_SIZE = 50;
 /** Default for -headerspamfiltermaxavg, maximum average size of an index occurrence in the header spam filter */
 static const unsigned int DEFAULT_HEADER_SPAM_FILTER_MAX_AVG = 10;
 
@@ -195,14 +197,15 @@ void UnregisterNodeSignals(CNodeSignals& nodeSignals);
  * Process an incoming block. This only returns after the best known valid
  * block is made active. Note that it does not, however, guarantee that the
  * specific block passed to it has been checked for validity!
- *
- * @param[out]  state   This may be set to an Error state if any error occurred processing it, including during validation/connection/etc of otherwise unrelated blocks during reorganisation; or it may be set to an Invalid state if pblock is itself invalid (but this is not guaranteed even when the block is checked). If you want to *possibly* get feedback on whether pblock is valid, you must also install a CValidationInterface - this will have its BlockChecked method called whenever *any* block completes validation.
+ * 
+ * @param[out]  state   This may be set to an Error state if any error occurred processing it, including during validation/connection/etc of otherwise unrelated blocks during reorganisation; or it may be set to an Invalid state if pblock is itself invalid (but this is not guaranteed even when the block is checked). If you want to *possibly* get feedback on whether pblock is valid, you must also install a CValidationInterface (see validationinterface.h) - this will have its BlockChecked method called whenever *any* block completes validation.
  * @param[in]   pfrom   The node which we are receiving the block from; it is added to mapBlockSource and may be penalised if the block is invalid.
  * @param[in]   pblock  The block we want to process.
+ * @param[in]   fForceProcessing Process this block even if unrequested; used for non-network block sources and whitelisted peers.
  * @param[out]  dbp     If pblock is stored to disk (or already there), this will be set to its location.
  * @return True if state.IsValid()
  */
-bool ProcessNewBlock(CValidationState& state, CNode* pfrom, CBlock* pblock, CDiskBlockPos* dbp = NULL);
+bool ProcessNewBlock(CValidationState &state, CNode* pfrom, CBlock* pblock, bool fForceProcessing, CDiskBlockPos *dbp);
 /** Check whether enough disk space is available for an incoming block */
 bool CheckDiskSpace(uint64_t nAdditionalBytes = 0);
 /** Open a block file (blk?????.dat) */
@@ -232,11 +235,6 @@ bool ProcessMessages(CNode* pfrom);
 bool SendMessages(CNode* pto, bool fSendTrickle);
 /** Run an instance of the script checking thread */
 void ThreadScriptCheck();
-
-// ***TODO*** probably not the right place for these 2
-/** Check whether a block hash satisfies the proof-of-work requirement specified by nBits */
-bool CheckProofOfWork(uint256 hash, int nVersion, unsigned int nBits);
-
 /** Check whether we are doing an initial block download (synchronizing from disk or network) */
 bool IsInitialBlockDownload();
 /** Format a string that describes several potential problems detected by the core */
@@ -422,21 +420,21 @@ class CScriptCheck
 {
 private:
     CScript scriptPubKey;
-    const CTransaction* ptxTo;
+    const CTransaction *ptxTo;
     unsigned int nIn;
     unsigned int nFlags;
     bool cacheStore;
     ScriptError error;
 
 public:
-    CScriptCheck() : ptxTo(0), nIn(0), nFlags(0), cacheStore(false), error(SCRIPT_ERR_UNKNOWN_ERROR) {}
-    CScriptCheck(const CCoins& txFromIn, const CTransaction& txToIn, unsigned int nInIn, unsigned int nFlagsIn, bool cacheIn) : scriptPubKey(txFromIn.vout[txToIn.vin[nInIn].prevout.n].scriptPubKey),
-                                                                                                                                ptxTo(&txToIn), nIn(nInIn), nFlags(nFlagsIn), cacheStore(cacheIn), error(SCRIPT_ERR_UNKNOWN_ERROR) {}
+    CScriptCheck(): ptxTo(0), nIn(0), nFlags(0), cacheStore(false), error(SCRIPT_ERR_UNKNOWN_ERROR) {}
+    CScriptCheck(const CCoins& txFromIn, const CTransaction& txToIn, unsigned int nInIn, unsigned int nFlagsIn, bool cacheIn) :
+        scriptPubKey(txFromIn.vout[txToIn.vin[nInIn].prevout.n].scriptPubKey),
+        ptxTo(&txToIn), nIn(nInIn), nFlags(nFlagsIn), cacheStore(cacheIn), error(SCRIPT_ERR_UNKNOWN_ERROR) { }
 
     bool operator()();
 
-    void swap(CScriptCheck& check)
-    {
+    void swap(CScriptCheck &check) {
         scriptPubKey.swap(check.scriptPubKey);
         std::swap(ptxTo, check.ptxTo);
         std::swap(nIn, check.nIn);
@@ -471,19 +469,20 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 
 /** Context-independent validity checks */
 bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, bool fCheckPOW = true);
-bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW = true, bool fCheckMerkleRoot = true, bool fCheckSig = true);
 bool CheckWork(const CBlock block, CBlockIndex* const pindexPrev);
+bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW = true, bool fCheckMerkleRoot = true);
 
 /** Context-dependent validity checks */
 bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& state, CBlockIndex* pindexPrev);
 bool ContextualCheckBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindexPrev);
 
 /** Check a block is completely valid from start to finish (only works on top of our current best block, with cs_main held) */
-bool TestBlockValidity(CValidationState& state, const CBlock& block, CBlockIndex* pindexPrev, bool fCheckPOW = true, bool fCheckMerkleRoot = true);
+bool TestBlockValidity(CValidationState &state, const CBlock& block, CBlockIndex *pindexPrev, bool fCheckPOW = true, bool fCheckMerkleRoot = true);
 
-/** Store block on disk. If dbp is provided, the file is known to already reside on disk */
+/** Store block on disk. If dbp is non-NULL, the file is known to already reside on disk */
 bool AcceptBlock(CBlock& block, CValidationState& state, CBlockIndex** pindex, CDiskBlockPos* dbp = NULL, bool fAlreadyCheckedBlock = false);
-bool AcceptBlockHeader(const CBlockHeader& block, CValidationState& state, CBlockIndex** ppindex = NULL);
+bool AcceptBlockHeader(const CBlockHeader& block, CValidationState& state, CBlockIndex **ppindex= NULL);
+
 
 
 class CBlockFileInfo
@@ -560,8 +559,9 @@ private:
 
 public:
     CValidationState() : mode(MODE_VALID), nDoS(0), chRejectCode(0), corruptionPossible(false) {}
-    bool DoS(int level, bool ret = false, unsigned char chRejectCodeIn = 0, std::string strRejectReasonIn = "", bool corruptionIn = false)
-    {
+    bool DoS(int level, bool ret = false,
+             unsigned char chRejectCodeIn=0, std::string strRejectReasonIn="",
+             bool corruptionIn=false) {
         chRejectCode = chRejectCodeIn;
         strRejectReason = strRejectReasonIn;
         corruptionPossible = corruptionIn;
@@ -572,45 +572,36 @@ public:
         return ret;
     }
     bool Invalid(bool ret = false,
-        unsigned char _chRejectCode = 0,
-        std::string _strRejectReason = "")
-    {
+                 unsigned char _chRejectCode=0, std::string _strRejectReason="") {
         return DoS(0, ret, _chRejectCode, _strRejectReason);
     }
-    bool Error(std::string strRejectReasonIn = "")
-    {
+    bool Error(std::string strRejectReasonIn="") {
         if (mode == MODE_VALID)
             strRejectReason = strRejectReasonIn;
         mode = MODE_ERROR;
         return false;
     }
-    bool Abort(const std::string& msg)
-    {
+    bool Abort(const std::string &msg) {
         AbortNode(msg);
         return Error(msg);
     }
-    bool IsValid() const
-    {
+    bool IsValid() const {
         return mode == MODE_VALID;
     }
-    bool IsInvalid() const
-    {
+    bool IsInvalid() const {
         return mode == MODE_INVALID;
     }
-    bool IsError() const
-    {
+    bool IsError() const {
         return mode == MODE_ERROR;
     }
-    bool IsInvalid(int& nDoSOut) const
-    {
+    bool IsInvalid(int &nDoSOut) const {
         if (IsInvalid()) {
             nDoSOut = nDoS;
             return true;
         }
         return false;
     }
-    bool CorruptionPossible() const
-    {
+    bool CorruptionPossible() const {
         return corruptionPossible;
     }
     unsigned char GetRejectCode() const { return chRejectCode; }
@@ -618,12 +609,11 @@ public:
 };
 
 /** RAII wrapper for VerifyDB: Verify consistency of the block and coin databases */
-class CVerifyDB
-{
+class CVerifyDB {
 public:
     CVerifyDB();
     ~CVerifyDB();
-    bool VerifyDB(CCoinsView* coinsview, int nCheckLevel, int nCheckDepth);
+    bool VerifyDB(CCoinsView *coinsview, int nCheckLevel, int nCheckDepth);
 };
 
 /** Find the last common block between the parameter chain and a locator. */

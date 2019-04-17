@@ -560,7 +560,7 @@ bool ProcessBlockFound(CBlock* pblock, CWallet& wallet, CReserveKey& reservekey)
 
     // Process this block the same as if we had received it from another node
     CValidationState state;
-    if (!ProcessNewBlock(state, NULL, pblock)) {
+    if (!ProcessNewBlock(state, NULL, pblock, true, NULL)) {
         if (pblock->IsZerocoinStake())
             pwalletMain->zecaTracker->RemovePending(pblock->vtx[1].GetHash());
         return error("ElectraMiner : ProcessNewBlock, block not accepted");
