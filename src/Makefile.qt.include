@@ -64,7 +64,8 @@ QT_FORMS_UI = \
   qt/forms/sendcoinsentry.ui \
   qt/forms/signverifymessagedialog.ui \
   qt/forms/transactiondescdialog.ui \
-  qt/forms/zecacontroldialog.ui
+  qt/forms/zecacontroldialog.ui \
+  qt/forms/Downloader.ui
 
 QT_MOC_CPP = \
   qt/moc_addressbookpage.cpp \
@@ -199,7 +200,10 @@ BITCOIN_QT_H = \
   qt/walletmodeltransaction.h \
   qt/walletview.h \
   qt/winshutdownmonitor.h \
-  qt/zecacontroldialog.h
+  qt/zecacontroldialog.h \
+  qt/Downloader.h \
+  qt/Updater.h \
+  qt/include/QSimpleUpdater.h
 
 RES_ICONS = \
   qt/res/icons/add.png \
@@ -333,7 +337,10 @@ BITCOIN_QT_WALLET_CPP = \
   qt/walletmodel.cpp \
   qt/walletmodeltransaction.cpp \
   qt/walletview.cpp \
-  qt/zecacontroldialog.cpp
+  qt/zecacontroldialog.cpp \
+  qt/Downloader.cpp \
+  qt/Updater.cpp \
+  qt/QSimpleUpdater.cpp
 
 BITCOIN_QT_CPP = $(BITCOIN_QT_BASE_CPP)
 if TARGET_WINDOWS
