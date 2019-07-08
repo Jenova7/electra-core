@@ -203,7 +203,7 @@ BITCOIN_QT_H = \
   qt/zecacontroldialog.h \
   qt/Downloader.h \
   qt/Updater.h \
-  qt/include/QSimpleUpdater.h
+  qt/QSimpleUpdater.h
 
 RES_ICONS = \
   qt/res/icons/add.png \
