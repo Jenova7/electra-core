@@ -65,7 +65,7 @@
          <string/>
         </property>
         <property name="pixmap">
-         <pixmap resource="../etc/resources/qsimpleupdater.qrc">:/icons/update.png</pixmap>
+         <pixmap resource="../../etc/resources/qsimpleupdater.qrc">:/icons/update.png</pixmap>
         </property>
        </widget>
       </item>
@@ -165,7 +165,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../etc/resources/qsimpleupdater.qrc"/>
+  <include location="../../etc/resources/qsimpleupdater.qrc"/>
  </resources>
  <connections/>
 </ui>
