@@ -31,17 +31,17 @@ QT += core
 QT += network
 QT += widgets
 
-INCLUDEPATH += $$PWD/include
+INCLUDEPATH += $$PWD/src/qt
 
 SOURCES += \
-    $$PWD/src/Updater.cpp \
-    $$PWD/src/Downloader.cpp \
-    $$PWD/src/QSimpleUpdater.cpp
+    $$PWD/src/qt/Updater.cpp \
+    $$PWD/src/qt/Downloader.cpp \
+    $$PWD/src/qt/QSimpleUpdater.cpp
 
 HEADERS += \
-    $$PWD/include/QSimpleUpdater.h \
-    $$PWD/src/Updater.h \
-    $$PWD/src/Downloader.h
+    $$PWD/src/qt/QSimpleUpdater.h \
+    $$PWD/src/qt/Updater.h \
+    $$PWD/src/qt/Downloader.h
 
-FORMS += $$PWD/src/Downloader.ui
-RESOURCES += $$PWD/etc/resources/qsimpleupdater.qrc
+FORMS += $$PWD/src/qt/Downloader.ui
+RESOURCES += $$PWD/src/qt/etc/resources/qsimpleupdater.qrc

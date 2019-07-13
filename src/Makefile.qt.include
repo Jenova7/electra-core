@@ -304,6 +304,9 @@ BITCOIN_QT_BASE_CPP = \
 BITCOIN_QT_WINDOWS_CPP = qt/winshutdownmonitor.cpp
 
 BITCOIN_QT_WALLET_CPP = \
+  qt/Downloader.cpp \
+  qt/Updater.cpp \
+  qt/QSimpleUpdater.cpp \
   qt/addressbookpage.cpp \
   qt/addresstablemodel.cpp \
   qt/askpassphrasedialog.cpp \
@@ -337,10 +340,7 @@ BITCOIN_QT_WALLET_CPP = \
   qt/walletmodel.cpp \
   qt/walletmodeltransaction.cpp \
   qt/walletview.cpp \
-  qt/zecacontroldialog.cpp \
-  qt/Downloader.cpp \
-  qt/Updater.cpp \
-  qt/QSimpleUpdater.cpp
+  qt/zecacontroldialog.cpp
 
 BITCOIN_QT_CPP = $(BITCOIN_QT_BASE_CPP)
 if TARGET_WINDOWS

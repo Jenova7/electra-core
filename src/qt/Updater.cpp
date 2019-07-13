@@ -39,11 +39,11 @@
 
 Updater::Updater()
 {
-    m_url = "";
+    m_url = "https://raw.githubusercontent.com/nashsclay/electra-core/autoupdate/src/qt/tutorial/definitions/updates.json";
     m_openUrl = "";
     m_changelog = "";
-    m_downloadUrl = "";
-    m_latestVersion = "";
+    m_downloadUrl = "https://raw.githubusercontent.com/alex-spataru/QSimpleUpdater/master/tutorial/download/YesItWorks.jpg";
+    m_latestVersion = "1.0";
     m_customAppcast = false;
     m_notifyOnUpdate = true;
     m_notifyOnFinish = false;

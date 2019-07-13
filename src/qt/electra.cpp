@@ -35,6 +35,10 @@
 #include "ui_interface.h"
 #include "util.h"
 
+#include "Updater.h"
+#include "Downloader.h"
+#include "QSimpleUpdater.h"
+
 #ifdef ENABLE_WALLET
 #include "wallet.h"
 #endif
@@ -619,6 +623,9 @@ int main(int argc, char* argv[])
     initTranslations(qtTranslatorBase, qtTranslator, translatorBase, translator);
 
 #ifdef ENABLE_WALLET
+
+    Updater::checkForUpdates(&m_url);
+
     /// 7a. parse masternode.conf
     string strErr;
     if (!masternodeConfig.read(strErr)) {

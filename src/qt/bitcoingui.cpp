@@ -34,6 +34,10 @@
 #include "ui_interface.h"
 #include "util.h"
 
+#include "Updater.h"
+#include "Downloader.h"
+#include "QSimpleUpdater.h"
+
 #include <iostream>
 
 #include <QAction>
@@ -181,6 +185,9 @@ BitcoinGUI::BitcoinGUI(const NetworkStyle* networkStyle, QWidget* parent) : QMai
     // Create status bar
     statusBar();
 
+    // Custom added
+    QApplication::setApplicationVersion ("1.0");
+    
     // Status bar notification icons
     QFrame* frameBlocks = new QFrame();
     frameBlocks->setContentsMargins(0, 0, 0, 0);
