@@ -1561,3 +1561,7 @@ void UnitDisplayStatusBarControl::onMenuSelection(QAction* action)
         optionsModel->setDisplayUnit(action->data());
     }
 }
+
+void Updater::checkForUpdates()
+{
+}

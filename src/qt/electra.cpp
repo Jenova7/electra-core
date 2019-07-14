@@ -624,8 +624,6 @@ int main(int argc, char* argv[])
 
 #ifdef ENABLE_WALLET
 
-    Updater::checkForUpdates(&m_url);
-
     /// 7a. parse masternode.conf
     string strErr;
     if (!masternodeConfig.read(strErr)) {
