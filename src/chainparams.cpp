@@ -75,7 +75,16 @@ static Checkpoints::MapCheckpoints mapCheckpoints =
     (272000, uint256("18641a1a0b8280e556d89a9870833f71c56dfd0f2f009864c60dc0ebfc8aec0c"))
     (281000, uint256("7149d72ff7d223018cc501f1a3ae91174c57289822e7a9f4f3bed3e9dfc948d1"))
     (290000, uint256("3c994e5cce0127a9c8fd7b7f10f3c9381dc4027b1e0c24eff6b93d4ddc02eb45"))
-    (294200, uint256("f0e34559eb14905d0befa07392bc8c8577aa288d714cf0af6c0e899eee8d3eb3"));
+    (294200, uint256("f0e34559eb14905d0befa07392bc8c8577aa288d714cf0af6c0e899eee8d3eb3"))
+    (300000, uint256("1536ef4c49537f805d51f0ac7184fd016dd01e34e440e95180d73611b051d5c3"))
+    (350000, uint256("edcf405e3b8da9842a8a428b720cad2840a0987147bea5dcbcf582fbb79f3583"))
+    (400000, uint256("d23d1cafe7514e3df1d68444ae18f9d4efc3c201cf5b02efb01dc983b890034e"))
+    (450000, uint256("214e491946d8f227d7069135f40800df0ec3a6cd7f1b889b2a171839b2fb9a44"))
+    (500000, uint256("13d1610e4d7d2501b2d3139265391c4363de332228d3bac68c9d959133ade686"))
+    (550000, uint256("9f5e359a17727235b9b0fb9b5a59fa4e6a11a29e3f661bdeb66939b961c7be14"))
+    (600000, uint256("6d0478d3bda0737760fb0e9c821c57527e142264dbf3739233e6d0fe304e5e1c"))
+    (645000, uint256("53c4deeef20ed0af390dafbda677061990da797d688ab29e266defabdbd35a79"));
+	//700000:
 
 static const Checkpoints::CCheckpointData data = {
     &mapCheckpoints,
@@ -199,26 +208,26 @@ public:
         assert(genesis.hashMerkleRoot == uint256("0xa45c61b17857983dee346573eb46cae28171b98a2595115fea8bc5a9227467dd"));
         assert(hashGenesisBlock == uint256("0x00000f98da995de0ef1665c7d3338687923c1199230a44ecbdb5cec9306e4f4e"));
         
-        vSeeds.push_back(CDNSSeedData("1", "79.137.39.240"));
-        vSeeds.push_back(CDNSSeedData("2", "51.38.115.250"));
-        vSeeds.push_back(CDNSSeedData("3", "54.38.53.207"));
-        vSeeds.push_back(CDNSSeedData("4", "178.128.111.9"));
-        vSeeds.push_back(CDNSSeedData("5", "159.89.168.255"));
-        vSeeds.push_back(CDNSSeedData("6", "192.171.18.198"));
-        vSeeds.push_back(CDNSSeedData("7", "167.114.145.147"));
-        vSeeds.push_back(CDNSSeedData("8", "51.38.83.67"));
-        vSeeds.push_back(CDNSSeedData("9", "54.37.235.120"));
-        vSeeds.push_back(CDNSSeedData("10", "165.22.155.173"));
-        vSeeds.push_back(CDNSSeedData("11", "167.114.67.75"));
-        vSeeds.push_back(CDNSSeedData("12", "68.183.81.213"));
+        vSeeds.push_back(CDNSSeedData("1", "seed01.electraproject.org"));
+        vSeeds.push_back(CDNSSeedData("2", "seed02.electraproject.org"));
+        vSeeds.push_back(CDNSSeedData("3", "seed03.electraproject.org"));
+        vSeeds.push_back(CDNSSeedData("4", "seed04.electraproject.org"));
+        vSeeds.push_back(CDNSSeedData("5", "seed05.electraproject.org"));
+        vSeeds.push_back(CDNSSeedData("6", "seed06.electraproject.org"));
+        vSeeds.push_back(CDNSSeedData("7", "seed07.electraproject.org"));
+        vSeeds.push_back(CDNSSeedData("8", "seed08.electraproject.org"));
+        vSeeds.push_back(CDNSSeedData("9", "seed09.electraproject.org"));
+        vSeeds.push_back(CDNSSeedData("10", "seed10.electraproject.org"));
 
         //vSeeds.push_back(CDNSSeedData("1", "zentec.ddns.net"));
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1, 33);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1, 40);
+        base58Prefixes[STEALTH_ADDRESS] = std::vector<unsigned char>(1, 40); //smY
         base58Prefixes[SECRET_KEY] = std::vector<unsigned char>(1, 161);
         base58Prefixes[EXT_PUBLIC_KEY] = boost::assign::list_of(0x04)(0x88)(0xB2)(0x1E).convert_to_container<std::vector<unsigned char> >();
         base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x04)(0x88)(0xAD)(0xE4).convert_to_container<std::vector<unsigned char> >();
+        //  BIP44 coin type is from https://github.com/satoshilabs/slips/blob/master/slip-0044.md
         base58Prefixes[EXT_COIN_TYPE] = boost::assign::list_of(0x80)(0x00)(0x00)(0xf9).convert_to_container<std::vector<unsigned char> >();
 
         convertSeed6(vFixedSeeds, pnSeed6_main, ARRAYLEN(pnSeed6_main));
@@ -316,6 +325,7 @@ public:
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1, 92);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1, 41);
+        base58Prefixes[STEALTH_ADDRESS] = std::vector<unsigned char>(1, 42); // Testnet stealth addresses start with 'vJm'
         base58Prefixes[SECRET_KEY] = std::vector<unsigned char>(1, 220);
         base58Prefixes[EXT_PUBLIC_KEY] = boost::assign::list_of(0x3a)(0x80)(0x61)(0xa0).convert_to_container<std::vector<unsigned char> >();
         base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x3a)(0x80)(0x58)(0x37).convert_to_container<std::vector<unsigned char> >();
